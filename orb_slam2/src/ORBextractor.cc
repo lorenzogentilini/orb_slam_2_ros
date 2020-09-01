@@ -61,6 +61,18 @@
 #include <vector>
 
 #include "ORBextractor.h"
+#include <assert.h>
+#include <ext/alloc_traits.h>
+#include <math.h>
+#include <opencv2/features2d.hpp>
+#include <opencv2/imgproc.hpp>
+#include <vector>
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <memory>
+#include <type_traits>
+#include <utility>
 
 
 using namespace cv;

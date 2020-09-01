@@ -27,8 +27,9 @@
 #include "Tracking.h"
 #include "KeyFrameDatabase.h"
 
+#include <opencv2/core.hpp>
 #include <mutex>
-
+#include <list>
 
 namespace ORB_SLAM2
 {
@@ -36,6 +37,8 @@ namespace ORB_SLAM2
 class Tracking;
 class LoopClosing;
 class Map;
+class KeyFrame;
+class MapPoint;
 
 class LocalMapping
 {

@@ -30,8 +30,12 @@
 #include "KeyFrameDatabase.h"
 #include "BoostArchiver.h"
 
+#include <stddef.h>
+#include <opencv2/core.hpp>
 #include <mutex>
-
+#include <map>
+#include <set>
+#include <vector>
 
 namespace ORB_SLAM2
 {

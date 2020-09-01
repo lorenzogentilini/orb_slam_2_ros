@@ -19,10 +19,14 @@
 */
 
 #include "FrameDrawer.h"
-#include "Tracking.h"
+#include <opencv2/imgproc.hpp>
+#include <memory>
+#include <ostream>
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include "Tracking.h"
+#include "Frame.h"
+#include "Map.h"
+#include "MapPoint.h"
 
 #include<mutex>
 

@@ -19,9 +19,20 @@
 */
 
 #include "Frame.h"
+#include <ext/alloc_traits.h>
+#include <ext/new_allocator.h>
+#include <limits.h>
+#include <math.h>
+#include <opencv2/calib3d.hpp>
+#include <thread>
+#include <algorithm>
+#include <memory>
+#include <utility>
+
 #include "Converter.h"
 #include "ORBmatcher.h"
-#include <thread>
+#include "MapPoint.h"
+#include "ORBextractor.h"
 
 namespace ORB_SLAM2
 {

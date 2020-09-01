@@ -31,6 +31,10 @@
 #include "ORBextractor.h"
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <cstddef>
+
+namespace ORB_SLAM2 {class ORBextractor;}
 
 namespace ORB_SLAM2
 {

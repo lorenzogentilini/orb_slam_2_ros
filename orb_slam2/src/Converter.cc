@@ -21,6 +21,10 @@
 
 #include "Converter.h"
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <algorithm>
+
 namespace ORB_SLAM2
 {
 

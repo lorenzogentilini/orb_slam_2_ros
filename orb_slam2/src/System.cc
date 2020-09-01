@@ -19,14 +19,33 @@
 */
 
 
-
 #include "System.h"
-#include "Converter.h"
+
+#include <pangolin/pangolin.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <thread>
 #include <iomanip>
+#include <algorithm>
+#include <iostream>
+#include <list>
+
+#include "Converter.h"
+#include "Frame.h"
+#include "FrameDrawer.h"
+#include "KeyFrame.h"
+#include "KeyFrameDatabase.h"
+#include "LocalMapping.h"
+#include "LoopClosing.h"
+#include "Map.h"
+#include "MapDrawer.h"
+#include "Tracking.h"
+#include "Viewer.h"
+
 
 namespace ORB_SLAM2
 {
+class MapPoint;
 
 System::System(const string strVocFile, const string strSettingsFile, const eSensor sensor,
                const std::string & map_file, bool load_map): // map serialization addition
@@ -337,16 +356,12 @@ void System::SaveTrajectoryTUM(const string &filename)
 
     // For each frame we have a reference keyframe (lRit), the timestamp (lT) and a flag
     // which is true when tracking failed (lbL).
-    list<ORB_SLAM2::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
-    list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
-    list<bool>::iterator lbL = mpTracker->mlbLost.begin();
-    for(list<cv::Mat>::iterator lit=mpTracker->mlRelativeFramePoses.begin(),
-        lend=mpTracker->mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lT++, lbL++)
+    for(list<Tracking::TrackedFrame>::iterator iter = mpTracker->tracked_frames.begin(), iter_end = mpTracker->tracked_frames.end(); iter != iter_end; iter++)
     {
-        if(*lbL)
+        if(iter->lost)
             continue;
 
-        KeyFrame* pKF = *lRit;
+        KeyFrame* pKF = iter->reference_keyframe;
 
         cv::Mat Trw = cv::Mat::eye(4,4,CV_32F);
 
@@ -359,13 +374,13 @@ void System::SaveTrajectoryTUM(const string &filename)
 
         Trw = Trw*pKF->GetPose()*Two;
 
-        cv::Mat Tcw = (*lit)*Trw;
+        cv::Mat Tcw = iter->relative_frame_pose*Trw;
         cv::Mat Rwc = Tcw.rowRange(0,3).colRange(0,3).t();
         cv::Mat twc = -Rwc*Tcw.rowRange(0,3).col(3);
 
         vector<float> q = Converter::toQuaternion(Rwc);
 
-        f << setprecision(6) << *lT << " " <<  setprecision(9) << twc.at<float>(0) << " " << twc.at<float>(1) << " " << twc.at<float>(2) << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
+        f << setprecision(6) << iter->time << " " <<  setprecision(9) << twc.at<float>(0) << " " << twc.at<float>(1) << " " << twc.at<float>(2) << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
     }
     f.close();
     cout << endl << "trajectory saved!" << endl;
@@ -434,11 +449,9 @@ void System::SaveTrajectoryKITTI(const string &filename)
 
     // For each frame we have a reference keyframe (lRit), the timestamp (lT) and a flag
     // which is true when tracking failed (lbL).
-    list<ORB_SLAM2::KeyFrame*>::iterator lRit = mpTracker->mlpReferences.begin();
-    list<double>::iterator lT = mpTracker->mlFrameTimes.begin();
-    for(list<cv::Mat>::iterator lit=mpTracker->mlRelativeFramePoses.begin(), lend=mpTracker->mlRelativeFramePoses.end();lit!=lend;lit++, lRit++, lT++)
+    for(list<Tracking::TrackedFrame>::iterator iter = mpTracker->tracked_frames.begin(), iter_end = mpTracker->tracked_frames.end(); iter != iter_end; iter++)
     {
-        ORB_SLAM2::KeyFrame* pKF = *lRit;
+        ORB_SLAM2::KeyFrame* pKF = iter->reference_keyframe;
 
         cv::Mat Trw = cv::Mat::eye(4,4,CV_32F);
 
@@ -451,7 +464,7 @@ void System::SaveTrajectoryKITTI(const string &filename)
 
         Trw = Trw*pKF->GetPose()*Two;
 
-        cv::Mat Tcw = (*lit)*Trw;
+        cv::Mat Tcw = iter->relative_frame_pose*Trw;
         cv::Mat Rwc = Tcw.rowRange(0,3).colRange(0,3).t();
         cv::Mat twc = -Rwc*Tcw.rowRange(0,3).col(3);
 
